@@ -30,6 +30,10 @@ def tcc_trans(t):
 $ pip install dtmcli
 ```
 
+### 完整示例
+
+[dtmcli-py-sample](https://github.com/yedf/dtmcli-py)
+
 
 ### License
 
