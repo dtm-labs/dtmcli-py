@@ -4,7 +4,7 @@
 a client for distributed transaction manager [dtm](https://github.com/yedf/dtm)
 
 
-`dtmcli` 是分布式事务管理器dtm的客户端sdk
+`dtmcli` 是分布式事务管理器[dtm](https://github.com/yedf/dtm)的客户端sdk
 
 ## dtm分布式事务管理服务
 
