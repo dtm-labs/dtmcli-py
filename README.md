@@ -68,7 +68,7 @@ $ pip install dtmcli
 
 ### 完整示例
 
-[dtmcli-py-sample](https://github.com/yedf/dtmcli-py)
+[dtmcli-py-sample](https://github.com/yedf/dtmcli-py-sample)
 
 
 ### License
