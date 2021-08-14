@@ -24,30 +24,32 @@ class Tcc(object):
           "confirm": confirmUrl,
           "cancel": cancalUrl,
       })
-      utils.check_status(r.status_code)
-      return requests.post(tryUrl, json=body, params={
+      utils.check_result(r)
+      r = requests.post(tryUrl, json=body, params={
           "gid": self.gid,
           "trans_type": "tcc",
           "branch_id": branch_id,
           "branch_type": "try",
       })
+      utils.check_result(r)
+      return r
 
-def tcc_global_transaction(dtmUrl, tcc_cb):
-    tcc = Tcc(dtmUrl, utils.gen_gid(dtmUrl))
+def tcc_global_transaction(dtmUrl, gid, tcc_cb):
+    tcc = Tcc(dtmUrl, gid)
     tbody = {
         "gid": tcc.gid,
         "trans_type": "tcc",
     }
     try:
         r = requests.post(tcc.dtm + "/prepare", json=tbody)
-        utils.check_status(r.status_code)
+        utils.check_result(r)
         tcc_cb(tcc)
         r = requests.post(tcc.dtm + "/submit", json=tbody)
-        utils.check_status(r.status_code)
+        utils.check_result(r)
     except:
         traceback.print_exception(*sys.exc_info())
         r = requests.post(tcc.dtm + "/abort", json=tbody)
-        utils.check_status(r.status_code)
+        utils.check_result(r)
         return ""
     return tcc.gid
 
