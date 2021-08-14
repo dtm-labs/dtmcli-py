@@ -1,3 +1,5 @@
 build
 dist
 dtmcli.egg-info
+dtmcli/__pycache__
+__pycache__
