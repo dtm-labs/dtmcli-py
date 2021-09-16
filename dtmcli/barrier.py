@@ -33,7 +33,7 @@ class BranchBarrier(object):
       current_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, self.branch_type, bid, self.branch_type)
       print("origin_affected: %d, current_affected: %d" % (origin_affected, current_affected))
       if (self.branch_type == "cancel" or self.branch_type == "compensate") and origin_affected > 0: # 这是空补偿
-        None
+        return None
       elif current_affected == 0: # 插入不成功
         affected = cursor.fetchall("select 1 from dtm_barrier.barrier where trans_type='%s' and gid='%s' and branch_id='%s' and branch_type='%s' and barrier_id='%s' and reason='%s'" % (self.trans_type, self.gid, self.branch_id, self.branch_type, self.barrier_id, self.branch_type))
         if affected == 0: # 不是当前分支类型插入，说明这是悬挂操作，因此走回滚逻辑
