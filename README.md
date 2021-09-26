@@ -49,7 +49,7 @@ DTM是一款跨语言的开源分布式事务管理器，优雅的解决了幂�
 from dtmcli import tcc
 
 def fire_tcc():
-    gid = tcc.tcc_global_transaction(dtm, tcc_trans)
+    gid = tcc.tcc_global_transaction(dtm, gid, tcc_trans)
     return {"gid": gid}
 
 def tcc_trans(t):
