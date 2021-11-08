@@ -14,13 +14,12 @@ class Tcc(object):
     self.id_generator = utils.IdGenerator()
   def call_branch(self, body, tryUrl, confirmUrl, cancalUrl):
       branch_id = self.id_generator.new_branch_id()
-      r = requests.post(self.dtm + "/registerTccBranch", json={
+      r = requests.post(self.dtm + "/registerBranch", json={
           "gid": self.gid,
           "branch_id": branch_id,
           "trans_type": "tcc",
           "status": "prepared",
           "data": json.dumps(body),
-          "try": tryUrl,
           "confirm": confirmUrl,
           "cancel": cancalUrl,
       })
@@ -29,7 +28,7 @@ class Tcc(object):
           "gid": self.gid,
           "trans_type": "tcc",
           "branch_id": branch_id,
-          "branch_type": "try",
+          "op": "try",
       })
       utils.check_result(r)
       return r

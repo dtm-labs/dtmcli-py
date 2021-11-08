@@ -15,11 +15,11 @@ class AutoCursor:
 
 
 class BranchBarrier(object):
-  def __init__(self, trans_type, gid, branch_id, branch_type):
+  def __init__(self, trans_type, gid, branch_id, op):
     self.trans_type = trans_type
     self.gid = gid
     self.branch_id = branch_id
-    self.branch_type = branch_type
+    self.op = op
     self.barrier_id = 0
   def call(self, cursor, busi_callback):
     self.barrier_id = self.barrier_id + 1
@@ -28,12 +28,12 @@ class BranchBarrier(object):
       orgin_branch = {
         "cancel": "try",
         "compensate": "action",
-      }.get(self.branch_type, "")
-      origin_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, orgin_branch, bid, self.branch_type)
-      current_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, self.branch_type, bid, self.branch_type)
+      }.get(self.op, "")
+      origin_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, orgin_branch, bid, self.op)
+      current_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, self.op, bid, self.op)
       print("origin_affected: %d, current_affected: %d" % (origin_affected, current_affected))
       # origin_affected > 0 这个是空补偿; current_affected == 0 这个是重复请求或悬挂
-      if (self.branch_type == "cancel" or self.branch_type == "compensate") and origin_affected > 0 or current_affected == 0:
+      if (self.op == "cancel" or self.op == "compensate") and origin_affected > 0 or current_affected == 0:
         return None
       busi_callback(cursor)
       cursor.connection.commit()
@@ -42,7 +42,7 @@ class BranchBarrier(object):
       raise
 
 # return affected_rows
-def insert_barrier(cursor, trans_type, gid, branch_id, branch_type, barrier_id, reason):
-  if branch_type == "":
+def insert_barrier(cursor, trans_type, gid, branch_id, op, barrier_id, reason):
+  if op == "":
     return 0
-  return utils.sqlexec(cursor, "insert ignore into dtm_barrier.barrier(trans_type, gid, branch_id, branch_type, barrier_id, reason) values('%s','%s','%s','%s','%s','%s')" % (trans_type, gid, branch_id, branch_type, barrier_id, reason))
+  return utils.sqlexec(cursor, "insert ignore into dtm_barrier.barrier(trans_type, gid, branch_id, op, barrier_id, reason) values('%s','%s','%s','%s','%s','%s')" % (trans_type, gid, branch_id, op, barrier_id, reason))

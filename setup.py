@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="dtmcli",
-    version="0.2.1",
+    version="1.5.0",
     author="yedf2",
-    author_email="dongfuye@163.com",
+    author_email="120050102@qq.com",
     description="python client for dtm",
     long_description=long_description,
     long_description_content_type="text/markdown",
