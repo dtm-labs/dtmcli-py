@@ -34,6 +34,7 @@ class BranchBarrier(object):
       print("origin_affected: %d, current_affected: %d" % (origin_affected, current_affected))
       # origin_affected > 0 这个是空补偿; current_affected == 0 这个是重复请求或悬挂
       if (self.op == "cancel" or self.op == "compensate") and origin_affected > 0 or current_affected == 0:
+        cursor.connection.commit()
         return None
       busi_callback(cursor)
       cursor.connection.commit()
