@@ -1,29 +1,37 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import requests
-import traceback
-import sys
 import json
-from dtmcli import utils
+from dtmcli import transbase, dtmimp
+
 
 class Saga(object):
-  def __init__(self, dtmUrl, gid):
-    self.dtm = dtmUrl
-    self.gid = gid
-    self.steps = []
-  def add(self, body, actionUrl, compensateUrl):
-    self.steps.append({
-      "data": json.dumps(body),
-      "action": actionUrl,
-      "compensate": compensateUrl,
-    })
-    return self
-  def submit(self):
-    r = requests.post(self.dtm + "/submit", json={
-      "gid": self.gid,
-      "trans_type": "saga",
-      "steps": self.steps,
-    })
-    utils.check_result(r)
+    def __init__(self, dtmUrl, gid):
+        self.dtm = dtmUrl
+        self.trans_base = transbase.TransBase(gid, "saga")
 
+    def add(self, body, actionUrl, compensateUrl):
+        self.trans_base.steps.append({
+            "action": actionUrl,
+            "compensate": compensateUrl,
+        })
+        self.trans_base.payloads.append(json.dumps(body))
+        return self
+
+    def add_branch_order(self, branch, pre_branches):
+        self.orders[branch] = pre_branches
+        return self
+
+    def set_concurrent(self):
+        self.trans_base.concurrent = True
+        return self
+
+    def build_custom_options(self):
+        if self.trans_base.concurrent:
+            self.trans_base.custom_data = json.dumps(
+                {"orders": self.orders, "concurrent": self.concurrent})
+
+    def submit(self):
+        self.build_custom_options()
+        dtmimp.trans_call_dtm(
+            self.dtm, self.trans_base.__dict__, "submit", self.trans_base.request_timeout)
