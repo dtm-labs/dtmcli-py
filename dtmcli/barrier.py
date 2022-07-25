@@ -32,6 +32,11 @@ class BranchBarrier(object):
       origin_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, orgin_branch, bid, self.op)
       current_affected = insert_barrier(cursor, self.trans_type, self.gid, self.branch_id, self.op, bid, self.op)
       print("origin_affected: %d, current_affected: %d" % (origin_affected, current_affected))
+
+      # for msg's DoAndSubmit, repeated insert should be rejected
+      if self.op == "msg" and current_affected == 0:
+        cursor.connection.commit()
+        raise Exception("msg duplicate error")
       # origin_affected > 0 这个是空补偿; current_affected == 0 这个是重复请求或悬挂
       if (self.op == "cancel" or self.op == "compensate") and origin_affected > 0 or current_affected == 0:
         cursor.connection.commit()
@@ -41,6 +46,16 @@ class BranchBarrier(object):
     except :
       cursor.connection.rollback()
       raise
+  def query_prepared(self, cursor):
+      affected_rows = insert_barrier(cursor, self.trans_type, self.gid, "00", "msg", "01", "rollback")
+      cursor.connection.commit()
+      sql = 'select reason from dtm_barrier.barrier where gid = "%s" and branch_id = "%s" and op= "%s" and barrier_id= "%s" '%(self.gid,"00","msg","01")
+      cursor.execute(sql)
+      data = cursor.fetchone()
+      print("query_prepared_sql: %s\t query_prepared_data: %s"%(sql,data))
+      if data[0] == "rollback":
+        raise utils.DTMFailureError('msg rollback')
+
 
 # return affected_rows
 def insert_barrier(cursor, trans_type, gid, branch_id, op, barrier_id, reason):
